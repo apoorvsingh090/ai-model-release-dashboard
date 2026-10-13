@@ -16,3 +16,12 @@ streamlit run streamlit_app.py
 ## Deploy
 
 Already deployed ☝️. To redeploy elsewhere, import this repo in [Streamlit Community Cloud](https://share.streamlit.io/) — main file is `streamlit_app.py`.
+
+## Updating the data
+
+Model data is **curated by hand, not auto-refreshed** — there is no reliable API for "latest model per lab", so `LABS` in `streamlit_app.py` is the source of truth. To add a release:
+
+1. Edit the lab's `model` / `latest=(month, day)` / `dots` / `avg` in `LABS`, and move `DATA_VINTAGE` to today.
+2. Commit + push — Streamlit Cloud redeploys automatically (that part *is* automatic).
+
+The app shows a staleness banner once the vintage is more than 14 days old.

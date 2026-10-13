@@ -13,6 +13,7 @@ import streamlit as st
 st.set_page_config(page_title="Days since latest AI model release", layout="wide")
 
 REF_DEFAULT = date(2026, 10, 13)
+DATA_VINTAGE = date(2026, 10, 13)  # last date the LABS entries were verified
 REPO_URL = "https://github.com/apoorvsingh090/ai-model-release-dashboard"
 
 # (month, day) tuples; US early dots illustrative, CN dots public release dates.
@@ -64,6 +65,13 @@ st.markdown(
 )
 st.caption("US labs (Meta · Anthropic · Google DeepMind · OpenAI · xAI) plus Chinese labs 🇨🇳 "
            "(DeepSeek · Qwen/Alibaba · Kimi/Moonshot · GLM/Zhipu). Language models only.")
+_vintage_age = (date.today() - DATA_VINTAGE).days
+if _vintage_age > 14:
+    st.warning(
+        f"📅 Data vintage: {DATA_VINTAGE.strftime('%b %d, %Y')} "
+        f"({_vintage_age} days ago) — newer model releases may exist. "
+        "Data here is curated by hand; see README 'Updating the data'."
+    )
 
 # ---- controls live in the sidebar so the dashboard stays uncluttered ----
 with st.sidebar:
@@ -76,7 +84,7 @@ with st.sidebar:
                         help="Every 'days since' count is computed from this date. "
                              "Move it forward to watch the counters tick up.")
     st.divider()
-    st.caption("📅 Data vintage: Oct 13, 2026. US dots are illustrative; "
+    st.caption(f"📅 Data vintage: {DATA_VINTAGE.strftime('%b %d, %Y')}. US dots are illustrative; "
                "CN dots are dated public releases (see Sources).")
     st.link_button("⭐ GitHub repo", REPO_URL)
 
@@ -227,5 +235,5 @@ with st.expander("Sources & methodology"):
     )
 
 st.divider()
-st.caption(f"Language models only · Data vintage Oct 13, 2026 · "
+st.caption(f"Language models only · Data vintage {DATA_VINTAGE.strftime('%b %d, %Y')} · "
            f"[⭐ Star on GitHub]({REPO_URL})")
