@@ -1,7 +1,7 @@
 """Days since latest AI model release — US + China extended (Streamlit).
 
-Run:  streamlit run days_since_streamlit.py
-Needs: streamlit, matplotlib (both already installed).
+Run locally:  streamlit run streamlit_app.py
+Needs: streamlit, matplotlib (see requirements.txt).
 """
 from datetime import date
 
@@ -13,6 +13,7 @@ import streamlit as st
 st.set_page_config(page_title="Days since latest AI model release", layout="wide")
 
 REF_DEFAULT = date(2026, 10, 13)
+REPO_URL = "https://github.com/apoorvsingh090/ai-model-release-dashboard"
 
 # (month, day) tuples; US early dots illustrative, CN dots public release dates.
 LABS = [
@@ -61,15 +62,23 @@ st.markdown(
     "Days since latest AI model release.</h1>",
     unsafe_allow_html=True,
 )
-st.caption("Extended with Chinese labs 🇨🇳 — DeepSeek · Qwen (Alibaba) · Kimi (Moonshot) · GLM (Zhipu). Language models only.")
+st.caption("US labs (Meta · Anthropic · Google DeepMind · OpenAI · xAI) plus Chinese labs 🇨🇳 "
+           "(DeepSeek · Qwen/Alibaba · Kimi/Moonshot · GLM/Zhipu). Language models only.")
 
-c1, c2 = st.columns([1, 1])
-with c1:
-    filt = st.radio("Labs", ["All labs (9)", "US only (5)", "China only (4)"],
-                    horizontal=True, label_visibility="collapsed")
-with c2:
+# ---- controls live in the sidebar so the dashboard stays uncluttered ----
+with st.sidebar:
+    st.header("⚙️ Controls")
+    filt = st.radio("Show", ["All labs (9)", "US only (5)", "China only (4)"])
+    sort = st.radio("Card order", ["Lab order", "Longest wait first", "Freshest first"],
+                    help="Reorder the leaderboard cards below.")
     ref = st.date_input("Reference date", value=REF_DEFAULT,
-                        min_value=date(2026, 1, 1), max_value=date(2027, 6, 30))
+                        min_value=date(2026, 1, 1), max_value=date(2027, 6, 30),
+                        help="Every 'days since' count is computed from this date. "
+                             "Move it forward to watch the counters tick up.")
+    st.divider()
+    st.caption("📅 Data vintage: Oct 13, 2026. US dots are illustrative; "
+               "CN dots are dated public releases (see Sources).")
+    st.link_button("⭐ GitHub repo", REPO_URL)
 
 region = {"All labs (9)": None, "US only (5)": "US", "China only (4)": "CN"}[filt]
 labs = [l for l in LABS if region is None or l["region"] == region]
@@ -87,7 +96,18 @@ def days_since(lab):
         return None
 
 
-# ---- cards (same look as static HTML) ----
+def _ds_or_zero(lab):
+    ds = days_since(lab)
+    return ds if ds is not None else 0
+
+
+if sort == "Longest wait first":
+    labs.sort(key=lambda l: (days_since(l) is None, -_ds_or_zero(l)))
+elif sort == "Freshest first":
+    labs.sort(key=lambda l: (days_since(l) is None, _ds_or_zero(l)))
+
+# ---- leaderboard cards (same look as static HTML) ----
+st.subheader("Leaderboard")
 st.markdown(
     """<style>
 .cards{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));border-radius:22px;overflow:hidden}
@@ -108,18 +128,30 @@ for l in labs:
     ds = days_since(l)
     ds_txt = str(max(ds, 0)) if ds is not None and ds >= 0 else "–"
     fill = min(100, max(ds or 0, 0) / l["avg"] * 100)
+    overdue = ds is not None and ds > l["avg"]
     lm, ld = l["latest"]
     cards_html.append(
         f"<div class='card' style='background:{l['bg']}'>"
         f"<div><div class='brand'>{l['icon']} {l['name']}</div>"
         f"<div class='num'>{ds_txt}</div><div>{'day' if ds_txt == '1' else 'days'}</div>"
-        f"<div class='bar'><div style='width:{fill:.1f}%'></div></div>"
-        f"<div class='avg'>Avg. every {l['avg']} days</div></div>"
+        f"<div class='bar' title='Days elapsed vs average release cadence'>"
+        f"<div style='width:{fill:.1f}%'></div></div>"
+        f"<div class='avg'>Avg. every {l['avg']} days"
+        f"{' · ⚠ overdue' if overdue else ''}</div></div>"
         f"<div class='foot'><b>{l['model']}</b><span>{MON[lm]} {ld}, {year}</span></div></div>"
     )
 cards_html.append("</div>")
 st.markdown("".join(cards_html), unsafe_allow_html=True)
-st.caption("Progress bar = days ÷ avg cadence. Pick another reference date above to recompute live.")
+st.caption("Progress bar = days elapsed ÷ average release cadence. "
+           "⚠ overdue = waiting longer than usual for this lab.")
+
+scored = [(l, ds) for l in labs if (ds := days_since(l)) is not None and ds >= 0]
+if scored:
+    f_lab, f_ds = min(scored, key=lambda t: t[1])
+    s_lab, s_ds = max(scored, key=lambda t: t[1])
+    st.info(f"🏆 Freshest: **{f_lab['name']}** — {f_lab['model']} "
+            f"({f_ds} day{'s' if f_ds != 1 else ''} ago) · "
+            f"⌛ Stalest: **{s_lab['name']}** — {s_lab['model']} ({s_ds} days ago)")
 
 # ---- timeline ----
 st.subheader("2026 releases")
@@ -164,16 +196,23 @@ for s in ax.spines.values():
 ax.grid(axis="x", color="#22212b", linewidth=0.6, linestyle=":")
 fig.subplots_adjust(left=0.18, right=0.80, top=0.94, bottom=0.12)
 st.pyplot(fig, use_container_width=True)
-st.caption("Language models only. Image, video and voice models are not counted.")
 
 # ---- table + sources ----
+st.subheader("All releases")
 rows = []
 for l in labs:
     ds = days_since(l)
     lm, ld = l["latest"]
+    if ds is None or ds < 0:
+        status = "—"
+    elif ds <= l["avg"]:
+        status = "✅ on pace"
+    else:
+        status = "⚠ overdue"
     rows.append({"Lab": f"{l['icon']} {l['name']}", "Region": l["region"],
                  "Latest model": l["model"], "Date": f"{MON[lm]} {ld}, {year}",
-                 "Days since": ds, "Avg (days)": l["avg"], "2026 releases": len(l["dots"])})
+                 "Days since": ds, "Status": status,
+                 "Avg (days)": l["avg"], "2026 releases": len(l["dots"])})
 st.dataframe(rows, use_container_width=True, hide_index=True)
 
 with st.expander("Sources & methodology"):
@@ -184,5 +223,9 @@ with st.expander("Sources & methodology"):
         "- **Kimi** — K2.8 Preview Sep 11, 2026 (kimi.com/code/docs + Moonshot blog).\n"
         "- **GLM** — GLM-5.3 Prime Sep 23, 2026 (z.ai blog + NIST CAISI Sep 17 assessment; Prime date via LMMarketCap).\n"
         "- Averages = releases ÷ 285 days elapsed (Jan 1 → Oct 13, 2026), rounded. "
-        "US avgs/cards kept from the original artifact screenshots."
+        "US avgs kept from the original artifact screenshots."
     )
+
+st.divider()
+st.caption(f"Language models only · Data vintage Oct 13, 2026 · "
+           f"[⭐ Star on GitHub]({REPO_URL})")
