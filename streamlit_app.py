@@ -75,6 +75,8 @@ region = {"All labs (9)": None, "US only (5)": "US", "China only (4)": "CN"}[fil
 labs = [l for l in LABS if region is None or l["region"] == region]
 year = ref.year
 jan1 = date(year, 1, 1)
+MON = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 
 def days_since(lab):
@@ -113,7 +115,7 @@ for l in labs:
         f"<div class='num'>{ds_txt}</div><div>{'day' if ds_txt == '1' else 'days'}</div>"
         f"<div class='bar'><div style='width:{fill:.1f}%'></div></div>"
         f"<div class='avg'>Avg. every {l['avg']} days</div></div>"
-        f"<div class='foot'><b>{l['model']}</b><span>{lm}/{ld}</span></div></div>"
+        f"<div class='foot'><b>{l['model']}</b><span>{MON[lm]} {ld}, {year}</span></div></div>"
     )
 cards_html.append("</div>")
 st.markdown("".join(cards_html), unsafe_allow_html=True)
@@ -170,7 +172,7 @@ for l in labs:
     ds = days_since(l)
     lm, ld = l["latest"]
     rows.append({"Lab": f"{l['icon']} {l['name']}", "Region": l["region"],
-                 "Latest model": l["model"], "Date": f"{year}/{lm:02d}/{ld:02d}",
+                 "Latest model": l["model"], "Date": f"{MON[lm]} {ld}, {year}",
                  "Days since": ds, "Avg (days)": l["avg"], "2026 releases": len(l["dots"])})
 st.dataframe(rows, use_container_width=True, hide_index=True)
 
