@@ -43,8 +43,8 @@ LABS = [
          dots=[(2, 19), (4, 24), (7, 31), (8, 13), (8, 21), (9, 10)]),
     dict(id="qwen", name="Qwen · Alibaba", icon="☁️", region="CN",
          color="#fb923c", bg="linear-gradient(180deg,#f97316,#7c2d12)",
-         avg=24, model="Qwen3.8-Omni-Flash", latest=(9, 18),
-         dots=[(1, 25), (2, 20), (3, 15), (4, 20), (5, 18), (6, 22), (7, 19), (8, 12), (8, 26), (9, 14), (9, 18), (9, 21)]),
+         avg=22, model="Qwen3.8 Max Prime", latest=(9, 23),
+         dots=[(1, 25), (2, 20), (3, 15), (4, 20), (5, 18), (6, 22), (7, 19), (8, 12), (8, 26), (9, 14), (9, 18), (9, 21), (9, 23)]),
     dict(id="kimi", name="Kimi · Moonshot", icon="🌙", region="CN",
          color="#e8e8e8", bg="linear-gradient(180deg,#2b2f38,#0d0e12)",
          avg=57, model="Kimi K2.8 Preview", latest=(9, 11),
@@ -72,7 +72,7 @@ with st.sidebar:
     sort = st.radio("Card order", ["Lab order", "Longest wait first", "Freshest first"],
                     help="Reorder the leaderboard cards below.")
     ref = st.date_input("Reference date", value=REF_DEFAULT,
-                        min_value=date(2026, 1, 1), max_value=date(2027, 6, 30),
+                        min_value=date(2026, 1, 1), max_value=date(2026, 12, 31),
                         help="Every 'days since' count is computed from this date. "
                              "Move it forward to watch the counters tick up.")
     st.divider()
@@ -218,8 +218,8 @@ st.dataframe(rows, use_container_width=True, hide_index=True)
 with st.expander("Sources & methodology"):
     st.markdown(
         "- **DeepSeek** — V4.1-Flash Sep 10, 2026 (api-docs.deepseek.com).\n"
-        "- **Qwen** — Qwen3.8-Omni-Flash Sep 18, 2026; 12 language-model releases tracked "
-        "(Sep 21 Omni-Realtime voice + Sep 24 decision-preview excluded). QwenCloud changelog + qwen.ai blog.\n"
+        "- **Qwen** — Qwen3.8 Max Prime Sep 23, 2026; 13 language-model releases tracked "
+        "(lmmarketcap + OpenCode Data; Sep 24 decision-preview excluded as unclassified). QwenCloud changelog + qwen.ai blog.\n"
         "- **Kimi** — K2.8 Preview Sep 11, 2026 (kimi.com/code/docs + Moonshot blog).\n"
         "- **GLM** — GLM-5.3 Prime Sep 23, 2026 (z.ai blog + NIST CAISI Sep 17 assessment; Prime date via LMMarketCap).\n"
         "- Averages = releases ÷ 285 days elapsed (Jan 1 → Oct 13, 2026), rounded. "
