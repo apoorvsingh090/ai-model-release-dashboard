@@ -1,5 +1,8 @@
 # Days Since Latest AI Model Release
 
+[![CI](https://img.shields.io/github/actions/workflow/status/apoorvsingh090/ai-model-release-dashboard/ci.yml?branch=main)](https://github.com/apoorvsingh090/ai-model-release-dashboard/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 🚀 **Live demo:** https://ai-model-release-dashboard-4vupclwmdzprxwdfegdvtw.streamlit.app/
 
 Tracker dashboard for flagship LLM releases — US labs (Meta, Anthropic, Google DeepMind, OpenAI, xAI) plus Chinese labs (DeepSeek, Qwen/Alibaba, Kimi/Moonshot, GLM/Zhipu).
@@ -25,3 +28,20 @@ Model data is **curated by hand, not auto-refreshed** — there is no reliable A
 2. Commit + push — Streamlit Cloud redeploys automatically (that part *is* automatic).
 
 The app shows a staleness banner once the vintage is more than 14 days old.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for data-curation rules and the PR
+process; [CHANGELOG.md](CHANGELOG.md) tracks changes. By participating you
+agree to the [Code of Conduct](CODE_OF_CONDUCT.md). Use the issue templates
+for bugs and feature requests.
+
+## Security
+
+Report tooling vulnerabilities privately via
+[GitHub Security Advisories](https://github.com/apoorvsingh090/ai-model-release-dashboard/security/advisories);
+see [SECURITY.md](SECURITY.md).
+
+## License
+
+MIT — see [LICENSE](LICENSE).
