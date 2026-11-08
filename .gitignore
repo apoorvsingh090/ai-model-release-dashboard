@@ -1,3 +1,12 @@
 __pycache__/
 *.pyc
+.venv/
+venv/
+.env
+.pytest_cache/
+.ruff_cache/
 .streamlit/
+dist/
+build/
+*.egg-info/
+preds*.jsonl
